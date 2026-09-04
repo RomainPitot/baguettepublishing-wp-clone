@@ -10,9 +10,11 @@ d'origine :
   puis blanc à nouveau, etc. (comme sur le site d'origine : le 1er étage,
   Jackie/ALMAGABRIEL/Herson/Mandarina, est blanc à liseré noir ; le 2e,
   Santoré/Pete Byrd/Verlatour, est noir à liseré rose).
-- Dans un étage, les colonnes se partagent la largeur également selon le
-  nombre d'artistes qu'il contient (1 → pleine largeur, 2 → 50/50,
-  3 → 33/33/33, 4 → 25/25/25/25) et restent centrées.
+- Dans un étage, les cartes gardent toujours la taille habituelle (celle
+  d'une rangée de 3) — jamais étirées en plein écran quand il y a peu
+  d'artistes. Un étage à 4 artistes passe à des cartes un peu plus
+  étroites (25%) comme sur le site d'origine ; en dessous de 4, les
+  cartes restent à la taille normale (33%) et sont centrées.
 - La disposition alterne en continu sur TOUS les artistes (pas juste au
   sein d'un étage) : photo en haut/texte en bas, puis texte en haut/photo
   en bas, etc. (Jackie=photo, ALMAGABRIEL=texte, Herson=photo, ...).
@@ -48,7 +50,10 @@ ICON_CLASSES = {
     "web": "fa fa-globe",
 }
 
-COL_WIDTH_CLASS = {1: "elementor-col-100", 2: "elementor-col-50", 3: "elementor-col-33", 4: "elementor-col-25"}
+# La carte garde toujours la taille "habituelle" (celle d'une rangée de
+# 3, comme sur le site d'origine) — jamais étirée en plein écran. Seul
+# un étage complet à 4 passe à des cartes un peu plus étroites (25%).
+COL_WIDTH_CLASS = {1: "elementor-col-33", 2: "elementor-col-33", 3: "elementor-col-33", 4: "elementor-col-25"}
 
 # Les deux jeux de couleurs déjà utilisés sur le site d'origine.
 FLOOR_STYLES = [
@@ -152,9 +157,13 @@ def build_floor(artists_in_floor, floor_index, start_position):
         bio_first = (start_position + i) % 2 == 1
         columns.append(build_column(a, bio_first, col_class, style["zigzag"], style["text_white"]))
     id_attr = ' id="artistes"' if floor_index == 0 else ""
+    # Étage incomplet (moins de 3 artistes, donc les cartes à taille
+    # normale ne remplissent pas la rangée) : on centre au lieu de les
+    # laisser collées à gauche.
+    justify = "justify-content:center;" if len(artists_in_floor) < 3 else ""
     return f'''
 				<section class="elementor-section elementor-top-section elementor-element elementor-element-{section_id} elementor-section-content-middle elementor-section-height-min-height elementor-section-boxed elementor-section-height-default elementor-section-items-middle" data-id="{section_id}" data-element_type="section"{id_attr} data-settings="{{&quot;background_background&quot;:&quot;classic&quot;}}" style="background-color:{style["bg"]};">
-						<div class="elementor-container elementor-column-gap-extended" style="min-height:400px;">{"".join(columns)}
+						<div class="elementor-container elementor-column-gap-extended" style="min-height:400px;{justify}">{"".join(columns)}
 					</div>
 		</section>'''
 
