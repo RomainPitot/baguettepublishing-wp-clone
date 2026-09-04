@@ -34,7 +34,8 @@ jobs:
             if git push; then
               exit 0
             fi
-            echo "Push rejeté, nouvelle tentative ($i/5)..."
+            echo "Push rejeté, nouvelle tentative dans ${i}s ($i/5)..."
+            sleep "$i"
             git fetch origin master
             git rebase origin/master
           done
