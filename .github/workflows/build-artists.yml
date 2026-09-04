@@ -21,10 +21,22 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          if ! git diff --quiet index.html; then
-            git add index.html
-            git commit -m "Régénère index.html depuis data/artists_grid.json [auto]"
-            git push
-          else
+          if git diff --quiet index.html; then
             echo "Aucun changement dans index.html"
+            exit 0
           fi
+          git add index.html
+          git commit -m "Régénère index.html depuis data/artists_grid.json [auto]"
+          # L'outil admin peut faire plusieurs commits coup sur coup (JSON
+          # puis suppression de la photo) : si un autre commit est arrivé
+          # entre-temps, on rebase et on réessaie plutôt que d'échouer.
+          for i in 1 2 3 4 5; do
+            if git push; then
+              exit 0
+            fi
+            echo "Push rejeté, nouvelle tentative ($i/5)..."
+            git fetch origin master
+            git rebase origin/master
+          done
+          echo "::error::Échec du push après plusieurs tentatives."
+          exit 1
