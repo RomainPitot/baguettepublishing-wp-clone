@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ajouter un artiste — Baguette Publishing</title>
+<style>
+  :root {
+    --pink: #E91E63;
+    --bg: #0f0f14;
+    --card: #1a1a22;
+    --border: #2c2c38;
+    --text: #f2f2f5;
+    --muted: #9a97a8;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: 32px 16px 80px;
+  }
+  .wrap { max-width: 640px; margin: 0 auto; }
+  header { text-align: center; margin-bottom: 32px; }
+  header h1 { font-size: 26px; margin: 0 0 6px; }
+  header p { color: var(--muted); margin: 0; font-size: 14px; }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 20px;
+  }
+  .card h2 { font-size: 16px; margin: 0 0 16px; color: var(--pink); }
+  label { display: block; font-size: 13px; color: var(--muted); margin: 14px 0 6px; }
+  label:first-of-type { margin-top: 0; }
+  input[type=text], input[type=url], input[type=password], textarea {
+    width: 100%;
+    background: #0f0f14;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    color: var(--text);
+    font-size: 14px;
+    font-family: inherit;
+  }
+  textarea { resize: vertical; min-height: 90px; }
+  input:focus, textarea:focus { outline: none; border-color: var(--pink); }
+  .social-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+  .social-row span { width: 90px; font-size: 13px; color: var(--muted); flex-shrink: 0; }
+  .dropzone {
+    border: 2px dashed var(--border);
+    border-radius: 10px;
+    padding: 24px;
+    text-align: center;
+    cursor: pointer;
+    color: var(--muted);
+    font-size: 14px;
+    transition: border-color .15s, background .15s;
+  }
+  .dropzone.drag { border-color: var(--pink); background: rgba(233,30,99,.06); }
+  .dropzone img { max-width: 100%; max-height: 220px; border-radius: 8px; display: block; margin: 0 auto 10px; }
+  .dropzone input { display: none; }
+  button {
+    background: var(--pink);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 13px 20px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    width: 100%;
+  }
+  button:disabled { opacity: .4; cursor: not-allowed; }
+  button.secondary { background: transparent; border: 1px solid var(--border); color: var(--text); font-weight: 500; }
+  .token-box { display: flex; gap: 8px; }
+  .token-box input { flex: 1; }
+  .token-box button { width: auto; white-space: nowrap; padding: 10px 16px; }
+  details { margin-top: 10px; font-size: 13px; color: var(--muted); }
+  details summary { cursor: pointer; color: var(--pink); }
+  details ol { padding-left: 18px; line-height: 1.7; }
+  details a { color: var(--pink); }
+  #status { margin-top: 16px; font-size: 14px; line-height: 1.6; white-space: pre-wrap; }
+  #status.ok { color: #34d399; }
+  #status.err { color: #f87171; }
+  #status a { color: var(--pink); }
+  .token-saved { display: flex; align-items: center; justify-content: space-between; background: #0f0f14; border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; font-size: 13px; color: var(--muted); }
+  .token-saved button { width: auto; background: transparent; color: var(--pink); padding: 4px 8px; font-size: 13px; }
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>🥖 Ajouter un artiste</h1>
+    <p>Remplissez la fiche, glissez la photo, cliquez sur Publier. Le site est mis à jour automatiquement en une minute.</p>
+  </header>
+
+  <div class="card" id="token-card">
+    <h2>Clé d'accès (une seule fois)</h2>
+    <div id="token-entry">
+      <p style="font-size:13px;color:var(--muted);margin:0 0 10px;">Il faut une clé GitHub pour publier. Elle reste uniquement sur cet ordinateur/navigateur, jamais envoyée ailleurs.</p>
+      <div class="token-box">
+        <input type="password" id="token-input" placeholder="Coller la clé ici (ghp_...)">
+        <button type="button" id="token-save">Enregistrer</button>
+      </div>
+      <details>
+        <summary>Comment obtenir cette clé ?</summary>
+        <ol>
+          <li>Aller sur <a href="https://github.com/settings/tokens/new" target="_blank">github.com/settings/tokens/new</a> (connecté avec le compte GitHub qui a accès au dépôt).</li>
+          <li>Note : "Ajout artiste site" — Expiration : au choix (ex. 1 an).</li>
+          <li>Cocher uniquement la case <b>repo</b>.</li>
+          <li>Cliquer "Generate token" en bas, puis copier la clé (elle ne sera montrée qu'une fois) et la coller ci-dessus.</li>
+        </ol>
+      </details>
+    </div>
+    <div id="token-saved-box" class="token-saved hidden">
+      <span>✅ Clé enregistrée sur cet appareil</span>
+      <button type="button" id="token-clear">Changer</button>
+    </div>
+  </div>
+
+  <form id="artist-form">
+    <div class="card">
+      <h2>Informations</h2>
+      <label for="f-name">Nom de l'artiste *</label>
+      <input type="text" id="f-name" required>
+
+      <label for="f-genre">Genre / tag court *</label>
+      <input type="text" id="f-genre" placeholder="ex. Pop Solaire" required>
+
+      <label for="f-bio">Biographie *</label>
+      <textarea id="f-bio" required></textarea>
+    </div>
+
+    <div class="card">
+      <h2>Réseaux sociaux (optionnel)</h2>
+      <div class="social-row"><span>Spotify</span><input type="url" id="s-spotify" placeholder="https://open.spotify.com/..."></div>
+      <div class="social-row"><span>Instagram</span><input type="url" id="s-instagram" placeholder="https://instagram.com/..."></div>
+      <div class="social-row"><span>Facebook</span><input type="url" id="s-facebook" placeholder="https://facebook.com/..."></div>
+      <div class="social-row"><span>YouTube</span><input type="url" id="s-youtube" placeholder="https://youtube.com/..."></div>
+      <div class="social-row"><span>TikTok</span><input type="url" id="s-tiktok" placeholder="https://tiktok.com/..."></div>
+      <div class="social-row"><span>SoundCloud</span><input type="url" id="s-soundcloud" placeholder="https://soundcloud.com/..."></div>
+    </div>
+
+    <div class="card">
+      <h2>Photo *</h2>
+      <div class="dropzone" id="dropzone">
+        <div id="dropzone-empty">📷 Glissez la photo ici, ou cliquez pour la choisir</div>
+        <img id="preview" class="hidden">
+        <input type="file" id="f-image" accept="image/*">
+      </div>
+    </div>
+
+    <button type="submit" id="submit-btn">Publier l'artiste</button>
+    <div id="status"></div>
+  </form>
+</div>
+
+<script>
+const OWNER = "RomainPitot";
+const REPO = "baguettepublishing-wp-clone";
+const BRANCH = "master";
+const API = `https://api.github.com/repos/${OWNER}/${REPO}`;
+const SITE_URL = `https://${OWNER.toLowerCase()}.github.io/${REPO}/`;
+
+const $ = (id) => document.getElementById(id);
+
+// ---- Token handling ----
+function getToken() { return localStorage.getItem("bp_gh_token") || ""; }
+function setToken(t) { localStorage.setItem("bp_gh_token", t); }
+function clearToken() { localStorage.removeItem("bp_gh_token"); }
+
+function refreshTokenUI() {
+  const has = !!getToken();
+  $("token-entry").classList.toggle("hidden", has);
+  $("token-saved-box").classList.toggle("hidden", !has);
+}
+refreshTokenUI();
+
+$("token-save").addEventListener("click", () => {
+  const v = $("token-input").value.trim();
+  if (!v) return;
+  setToken(v);
+  $("token-input").value = "";
+  refreshTokenUI();
+});
+$("token-clear").addEventListener("click", () => {
+  clearToken();
+  refreshTokenUI();
+});
+
+// ---- Image drag & drop ----
+let imageFile = null;
+const dropzone = $("dropzone");
+const fileInput = $("f-image");
+
+dropzone.addEventListener("click", () => fileInput.click());
+["dragenter", "dragover"].forEach(ev =>
+  dropzone.addEventListener(ev, (e) => { e.preventDefault(); dropzone.classList.add("drag"); })
+);
+["dragleave", "drop"].forEach(ev =>
+  dropzone.addEventListener(ev, (e) => { e.preventDefault(); dropzone.classList.remove("drag"); })
+);
+dropzone.addEventListener("drop", (e) => {
+  if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+});
+fileInput.addEventListener("change", (e) => {
+  if (e.target.files.length) handleFile(e.target.files[0]);
+});
+
+function handleFile(file) {
+  if (!file.type.startsWith("image/")) return;
+  imageFile = file;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    $("preview").src = e.target.result;
+    $("preview").classList.remove("hidden");
+    $("dropzone-empty").classList.add("hidden");
+  };
+  reader.readAsDataURL(file);
+}
+
+// ---- Helpers ----
+function slugify(s) {
+  return s.normalize("NFD").replace(/[̀-ͯ]/g, "")
+    .toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+}
+
+function utf8ToBase64(str) {
+  return btoa(unescape(encodeURIComponent(str)));
+}
+function base64ToUtf8(str) {
+  return decodeURIComponent(escape(atob(str)));
+}
+function arrayBufferToBase64(buffer) {
+  let binary = "";
+  const bytes = new Uint8Array(buffer);
+  for (let i = 0; i < bytes.byteLength; i++) binary += String.fromCharCode(bytes[i]);
+  return btoa(binary);
+}
+
+async function ghRequest(path, opts) {
+  const token = getToken();
+  const res = await fetch(`${API}/contents/${path}`, {
+    ...opts,
+    headers: {
+      "Authorization": `Bearer ${token}`,
+      "Accept": "application/vnd.github+json",
+      ...(opts && opts.headers ? opts.headers : {}),
+    },
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(`${res.status} ${res.statusText}${body.message ? " — " + body.message : ""}`);
+  }
+  return res.json();
+}
+
+function setStatus(msg, cls) {
+  const el = $("status");
+  el.textContent = msg;
+  el.className = cls || "";
+}
+
+// ---- Submit ----
+$("artist-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const token = getToken();
+  if (!token) { setStatus("Ajoutez d'abord votre clé d'accès ci-dessus.", "err"); return; }
+
+  const name = $("f-name").value.trim();
+  const genre = $("f-genre").value.trim();
+  const bio = $("f-bio").value.trim();
+  if (!name || !genre || !bio) { setStatus("Merci de remplir le nom, le genre et la biographie.", "err"); return; }
+  if (!imageFile) { setStatus("Merci d'ajouter une photo.", "err"); return; }
+
+  const socials = [];
+  [["spotify","s-spotify"],["instagram","s-instagram"],["facebook","s-facebook"],
+   ["youtube","s-youtube"],["tiktok","s-tiktok"],["soundcloud","s-soundcloud"]]
+    .forEach(([icon, id]) => {
+      const url = $(id).value.trim();
+      if (url) socials.push({ icon, url });
+    });
+
+  const btn = $("submit-btn");
+  btn.disabled = true;
+
+  try {
+    // 1. Upload de la photo
+    setStatus("Envoi de la photo...");
+    const ext = (imageFile.name.split(".").pop() || "jpg").toLowerCase();
+    const suffix = Math.random().toString(36).slice(2, 7);
+    const imagePath = `wp-content/uploads/2025/09/${slugify(name)}-${suffix}.${ext}`;
+    const imageBuffer = await imageFile.arrayBuffer();
+    await ghRequest(imagePath, {
+      method: "PUT",
+      body: JSON.stringify({
+        message: `Ajoute la photo de ${name}`,
+        content: arrayBufferToBase64(imageBuffer),
+        branch: BRANCH,
+      }),
+    });
+
+    // 2. Mise à jour de data/artists_grid.json
+    setStatus("Ajout de la fiche artiste...");
+    const current = await ghRequest("data/artists_grid.json", { method: "GET" });
+    const list = JSON.parse(base64ToUtf8(current.content.replace(/\n/g, "")));
+    list.push({ name, genre, bio, card_image: imagePath, socials });
+    const newContent = JSON.stringify(list, null, 2) + "\n";
+
+    await ghRequest("data/artists_grid.json", {
+      method: "PUT",
+      body: JSON.stringify({
+        message: `Ajoute l'artiste ${name}`,
+        content: utf8ToBase64(newContent),
+        sha: current.sha,
+        branch: BRANCH,
+      }),
+    });
+
+    setStatus(
+      `✅ « ${name} » a été ajouté ! Le site se met à jour automatiquement, ça prend environ 1 minute.\n\nVoir le site : ${SITE_URL}`,
+      "ok"
+    );
+    $("artist-form").reset();
+    imageFile = null;
+    $("preview").classList.add("hidden");
+    $("dropzone-empty").classList.remove("hidden");
+  } catch (err) {
+    setStatus("❌ Une erreur est survenue : " + err.message, "err");
+  } finally {
+    btn.disabled = false;
+  }
+});
+</script>
+</body>
+</html>
