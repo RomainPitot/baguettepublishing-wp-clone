@@ -1,0 +1,25 @@
+/* Filet de sécurité pour les cartes artiste ajoutées par l'outil
+   d'admin (data/artists_grid.json).
+   Le thème génère normalement ces réglages de survol individuellement,
+   par identifiant d'élément, dans wp-content/uploads/elementor/css/post-619.css
+   (un artiste = un identifiant = une règle dédiée, mais toujours avec
+   les mêmes valeurs). Comme ce fichier n'est pas régénéré par notre
+   script, les nouvelles cartes (nouvel identifiant, inconnu de ce
+   fichier) retombaient sur le style par défaut du thème — un bloc rose
+   plein au survol au lieu du voile sombre habituel qui laisse voir la
+   photo.
+   Ces règles reproduisent exactement les mêmes valeurs, en version
+   générique (sans identifiant précis). Elles ont une spécificité CSS
+   plus faible que les règles par identifiant du thème : elles ne
+   changent donc RIEN au rendu des 7 artistes d'origine, elles ne
+   servent que de repli pour les cartes qui n'ont pas leur propre règle. */
+
+.port-inner:hover .port-box { background-color: #000000; opacity: 0.7; }
+.dbox-relative { padding: 30px 30px 30px 30px; background-color: #00000000; text-align: center; }
+.dbox-relative h3 { display: block; }
+.dbox-relative p { display: inline-block; color: #FFFFFF; background-color: #000000; padding: 5px 5px 5px 5px; }
+.team-sicon li a { color: #FFFFFF; background-color: #E91E63; border-radius: 100px; font-size: 13px; line-height: 13px; padding: 10px; }
+.team-sicon li a:hover { color: #E91E63; background-color: #FFFFFF; opacity: 1; }
+.port-box { padding: 370px 0 0 0; }
+.port-img { background-position: center center; }
+.port-dbox { padding: 30px 30px 30px 30px; }
