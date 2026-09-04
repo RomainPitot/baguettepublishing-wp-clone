@@ -138,5 +138,12 @@
         "url": "http://www.youtube.com/@Verlatour"
       }
     ]
+  },
+  {
+    "name": "API Test Artist",
+    "genre": "Test API",
+    "bio": "Artiste ajoute via test direct de l API GitHub Contents, pour valider le flux avant mise en prod de l outil admin.",
+    "card_image": "wp-content/uploads/2025/09/_api_test.txt",
+    "socials": []
   }
 ]
