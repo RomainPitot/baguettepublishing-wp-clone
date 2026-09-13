@@ -1,9 +1,10 @@
-name: Régénérer la page depuis data/artists_grid.json
+name: Régénérer la page depuis data/*.json
 
 on:
   push:
     paths:
       - "data/artists_grid.json"
+      - "data/site_content.json"
 
 permissions:
   contents: write
@@ -15,7 +16,9 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Régénère index.html
-        run: python3 scripts/build_artists_floors.py
+        run: |
+          python3 scripts/build_artists_floors.py
+          python3 scripts/build_site_content.py
 
       - name: Commit si changement
         run: |
@@ -26,7 +29,7 @@ jobs:
             exit 0
           fi
           git add index.html
-          git commit -m "Régénère index.html depuis data/artists_grid.json [auto]"
+          git commit -m "Régénère index.html depuis data/*.json [auto]"
           # L'outil admin peut faire plusieurs commits coup sur coup (JSON
           # puis suppression de la photo) : si un autre commit est arrivé
           # entre-temps, on rebase et on réessaie plutôt que d'échouer.
