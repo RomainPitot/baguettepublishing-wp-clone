@@ -382,6 +382,20 @@ async function uploadImage(file, slugBase) {
   return path;
 }
 
+// Best-effort : supprime une image devenue inutile (remplacée par une
+// nouvelle) pour ne pas laisser le dépôt s'alourdir avec des fichiers
+// orphelins. Échoue silencieusement si le fichier n'existe déjà plus.
+async function deleteImageBestEffort(path, label) {
+  if (!path) return;
+  try {
+    const info = await ghRequest(path, { method: "GET" });
+    await ghRequest(path, {
+      method: "DELETE",
+      body: JSON.stringify({ message: `Retire l'ancienne image (${label})`, sha: info.sha, branch: BRANCH }),
+    });
+  } catch (err) { /* pas grave si l'ancienne image ne peut pas être supprimée */ }
+}
+
 function setStatus(elId, msg, cls) {
   const el = $(elId);
   el.textContent = msg;
@@ -631,9 +645,13 @@ $("hero-save").addEventListener("click", async () => {
       const word = card.querySelector(".hero-word").value.trim();
       const text = card.querySelector(".hero-text").value.trim();
       const dz = heroDropzones[i];
-      let image = dz.getCurrentPath() || "";
+      const oldPath = dz.getCurrentPath() || "";
+      let image = oldPath;
       const file = dz.getFile();
-      if (file) image = await uploadImage(file, name || "hero");
+      if (file) {
+        image = await uploadImage(file, name || "hero");
+        if (oldPath) await deleteImageBestEffort(oldPath, `diapositive ${name || i + 1}`);
+      }
       slides.push({ name, word, text, image });
     }
     setStatus("hero-status", "Publication...");
@@ -689,9 +707,13 @@ $("about-save").addEventListener("click", async () => {
   try {
     setStatus("about-status", "Publication...");
     const paragraphs = Array.from($("about-paragraphs").querySelectorAll("textarea")).map((t) => t.value.trim()).filter(Boolean);
-    let image = aboutDropzone.getCurrentPath() || "";
+    const oldImage = aboutDropzone.getCurrentPath() || "";
+    let image = oldImage;
     const file = aboutDropzone.getFile();
-    if (file) image = await uploadImage(file, "about");
+    if (file) {
+      image = await uploadImage(file, "about");
+      if (oldImage) await deleteImageBestEffort(oldImage, "Qui sommes-nous");
+    }
     const { data, sha } = await getJsonFile("data/site_content.json");
     data.about = { title: $("about-title").value.trim(), eyebrow: $("about-eyebrow").value.trim(), paragraphs, image };
     await putJsonFile("data/site_content.json", data, "Met à jour la section Qui sommes-nous", sha);
@@ -747,9 +769,13 @@ $("contact-save").addEventListener("click", async () => {
       icon: row.querySelector("select").value,
       url: row.querySelector("input").value.trim(),
     })).filter((s) => s.url);
-    let logo = contactDropzone.getCurrentPath() || "";
+    const oldLogo = contactDropzone.getCurrentPath() || "";
+    let logo = oldLogo;
     const file = contactDropzone.getFile();
-    if (file) logo = await uploadImage(file, "logo-contact");
+    if (file) {
+      logo = await uploadImage(file, "logo-contact");
+      if (oldLogo) await deleteImageBestEffort(oldLogo, "logo contact");
+    }
     const { data, sha } = await getJsonFile("data/site_content.json");
     data.contact = {
       city: $("contact-city").value.trim(),

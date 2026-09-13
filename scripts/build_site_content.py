@@ -87,7 +87,7 @@ def build_hero(slides):
 
 
 def build_about(about):
-    paras = "".join(f"<p>{p}</p>" for p in about["paragraphs"])
+    paras = "".join(f"<p>{esc(p)}</p>" for p in about["paragraphs"])
     eyebrow_id, body_id, img_id, title_id = (rand_id() for _ in range(4))
     return f'''
 				<section class="elementor-section elementor-top-section elementor-element elementor-element-{rand_id()} elementor-section-boxed elementor-section-height-default elementor-section-height-default" data-element_type="section" id="about" data-settings="{{&quot;background_background&quot;:&quot;classic&quot;}}">
