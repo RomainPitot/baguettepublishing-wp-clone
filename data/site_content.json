@@ -1,0 +1,59 @@
+{
+  "hero_slides": [
+    {
+      "name": "Jackie Moontan",
+      "word": "Music",
+      "text": "Voyagez dans un univers où funk et pop s'entrelacent",
+      "image": "wp-content/uploads/2025/09/jackie-moontan-pic.jpg"
+    },
+    {
+      "name": "Herson",
+      "word": "Makes",
+      "text": "Une plongée intime au creux de paysages sonores inédits",
+      "image": "wp-content/uploads/2025/09/Herson-photo-scaled.jpeg"
+    },
+    {
+      "name": "Mandarina",
+      "word": "Dreams",
+      "text": "Un souffle pop qui caresse et transporte les sens",
+      "image": "wp-content/uploads/2025/09/Mandarina-No-Soy-de-Aqui-CLIP.jpg"
+    },
+    {
+      "name": "Verlatour",
+      "word": "Real",
+      "text": "Un univers électronique où chaque note devient un voyage",
+      "image": "wp-content/uploads/2025/09/Verlatour-2.jpeg"
+    },
+    {
+      "name": "ALMAGABRIEL",
+      "word": "Feel",
+      "text": "Entre électro et organique, un voyage sensoriel vous attend",
+      "image": "wp-content/uploads/2025/09/IMG_6376.jpeg"
+    },
+    {
+      "name": "Pete Byrd",
+      "word": "it",
+      "text": "Une folk intimiste qui murmure au-delà des frontières",
+      "image": "wp-content/uploads/2025/09/Pete-Byrd-1.jpeg"
+    }
+  ],
+  "about": {
+    "title": "Qui sommes-nous ?",
+    "eyebrow": "Baguette Publishing",
+    "paragraphs": [
+      "<b>Baguette Publishing</b>, maison d’édition musicale indépendante fondée en 2015, accompagne les artistes émergents et développe des projets singuliers. Notre objectif : révéler les talents de demain et construire un catalogue éclectique, conçu pour inspirer et faciliter la synchronisation musicale.",
+      "Depuis nos débuts, nous collaborons étroitement avec des créateurs issus de la scène française et internationale, en proposant un accompagnement sur mesure et en valorisant leurs œuvres auprès des professionnels de la musique, de l’audiovisuel et de la publicité.",
+      "César Mathieu – Music Supervisor et expert en publishing, passionné par l’accompagnement d’artistes et la valorisation de leurs projets musicaux."
+    ],
+    "image": "wp-content/uploads/2025/09/Visuel-13_51_02-1.png"
+  },
+  "contact": {
+    "city": "Toulouse",
+    "email": "hey@baguettepublishing.com",
+    "quote": "« L’édition est un métier passionnant du fait de sa transversalité. On est au cœur de l’avenir de la musique, et c’est pour nous l’occasion de faire découvrir les talents de demain au grand public. »",
+    "logo": "wp-content/uploads/2019/05/baguette-logo-pink-150x150.png",
+    "socials": [
+      {"icon": "linkedin", "url": "https://www.linkedin.com/company/baguette-publishing"}
+    ]
+  }
+}
