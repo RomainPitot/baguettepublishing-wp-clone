@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Ajouter un artiste — Baguette Publishing</title>
+<title>Administration — Baguette Publishing</title>
 <style>
   :root {
     --pink: #E91E63;
@@ -22,7 +22,7 @@
     padding: 32px 16px 80px;
   }
   .wrap { max-width: 640px; margin: 0 auto; }
-  header { text-align: center; margin-bottom: 32px; }
+  header { text-align: center; margin-bottom: 24px; }
   header h1 { font-size: 26px; margin: 0 0 6px; }
   header p { color: var(--muted); margin: 0; font-size: 14px; }
   .card {
@@ -35,7 +35,7 @@
   .card h2 { font-size: 16px; margin: 0 0 16px; color: var(--pink); }
   label { display: block; font-size: 13px; color: var(--muted); margin: 14px 0 6px; }
   label:first-of-type { margin-top: 0; }
-  input[type=text], input[type=url], input[type=password], textarea {
+  input[type=text], input[type=url], input[type=password], input[type=email], textarea, select {
     width: 100%;
     background: #0f0f14;
     border: 1px solid var(--border);
@@ -46,7 +46,7 @@
     font-family: inherit;
   }
   textarea { resize: vertical; min-height: 90px; }
-  input:focus, textarea:focus { outline: none; border-color: var(--pink); }
+  input:focus, textarea:focus, select:focus { outline: none; border-color: var(--pink); }
   .social-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
   .social-row span { width: 90px; font-size: 13px; color: var(--muted); flex-shrink: 0; }
   .dropzone {
@@ -62,6 +62,8 @@
   .dropzone.drag { border-color: var(--pink); background: rgba(233,30,99,.06); }
   .dropzone img { max-width: 100%; max-height: 220px; border-radius: 8px; display: block; margin: 0 auto 10px; }
   .dropzone input { display: none; }
+  .dropzone.small { padding: 10px; }
+  .dropzone.small img { max-height: 100px; }
   button {
     background: var(--pink);
     color: #fff;
@@ -75,6 +77,9 @@
   }
   button:disabled { opacity: .4; cursor: not-allowed; }
   button.secondary { background: transparent; border: 1px solid var(--border); color: var(--text); font-weight: 500; }
+  button.link-btn { width: auto; background: transparent; color: var(--pink); padding: 6px 4px; font-size: 13px; font-weight: 500; }
+  button.remove-btn { width: auto; background: transparent; border: 1px solid var(--border); color: #f87171; padding: 6px 12px; font-size: 13px; font-weight: 500; }
+  button.remove-btn:hover { background: rgba(248,113,113,.1); border-color: #f87171; }
   .token-box { display: flex; gap: 8px; }
   .token-box input { flex: 1; }
   .token-box button { width: auto; white-space: nowrap; padding: 10px 16px; }
@@ -82,10 +87,10 @@
   details summary { cursor: pointer; color: var(--pink); }
   details ol { padding-left: 18px; line-height: 1.7; }
   details a { color: var(--pink); }
-  #status { margin-top: 16px; font-size: 14px; line-height: 1.6; white-space: pre-wrap; }
-  #status.ok { color: #34d399; }
-  #status.err { color: #f87171; }
-  #status a { color: var(--pink); }
+  .status-msg { margin-top: 16px; font-size: 14px; line-height: 1.6; white-space: pre-wrap; }
+  .status-msg.ok { color: #34d399; }
+  .status-msg.err { color: #f87171; }
+  .status-msg a { color: var(--pink); }
   .token-saved { display: flex; align-items: center; justify-content: space-between; background: #0f0f14; border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; font-size: 13px; color: var(--muted); }
   .token-saved button { width: auto; background: transparent; color: var(--pink); padding: 4px 8px; font-size: 13px; }
   .hidden { display: none !important; }
@@ -99,21 +104,31 @@
   .artist-row img { width: 40px; height: 40px; border-radius: 6px; object-fit: cover; flex-shrink: 0; background: #000; }
   .artist-row .name { flex: 1; font-size: 14px; }
   .artist-row .name small { display: block; color: var(--muted); font-size: 12px; }
-  .artist-row button {
-    width: auto; background: transparent; border: 1px solid var(--border);
-    color: #f87171; padding: 6px 12px; font-size: 13px; font-weight: 500;
-  }
+  .artist-row button { width: auto; background: transparent; border: 1px solid var(--border); color: #f87171; padding: 6px 12px; font-size: 13px; font-weight: 500; }
   .artist-row button:hover { background: rgba(248,113,113,.1); border-color: #f87171; }
   .artist-row button.confirming { background: #f87171; color: #fff; border-color: #f87171; }
-  #manage-status { font-size: 13px; color: var(--muted); margin-top: 6px; }
-  #manage-empty { font-size: 13px; color: var(--muted); }
+  .manage-status { font-size: 13px; color: var(--muted); margin-top: 6px; }
+  .manage-empty { font-size: 13px; color: var(--muted); }
+
+  .tabs { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
+  .tab-btn {
+    width: auto; background: transparent; border: 1px solid var(--border);
+    color: var(--muted); padding: 9px 16px; font-size: 13px; font-weight: 600;
+    border-radius: 999px;
+  }
+  .tab-btn.active { background: var(--pink); color: #fff; border-color: var(--pink); }
+  .tab-panel.hidden { display: none !important; }
+
+  .item-card { background: #0f0f14; border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin-bottom: 14px; }
+  .item-card-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+  .item-card-head .idx { font-size: 12px; color: var(--muted); font-weight: 600; letter-spacing: .04em; text-transform: uppercase; }
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
-    <h1>🥖 Ajouter un artiste</h1>
-    <p>Remplissez la fiche, glissez la photo, cliquez sur Publier. Le site est mis à jour automatiquement en une minute.</p>
+    <h1>🥖 Administration du site</h1>
+    <p>Modifiez le contenu, glissez les photos, publiez. Le site se met à jour automatiquement en une minute.</p>
   </header>
 
   <div class="card" id="token-card">
@@ -128,7 +143,7 @@
         <summary>Comment obtenir cette clé ?</summary>
         <ol>
           <li>Aller sur <a href="https://github.com/settings/tokens/new" target="_blank">github.com/settings/tokens/new</a> (connecté avec le compte GitHub qui a accès au dépôt).</li>
-          <li>Note : "Ajout artiste site" — Expiration : au choix (ex. 1 an).</li>
+          <li>Note : "Admin site Baguette" — Expiration : au choix (ex. 1 an).</li>
           <li>Cocher uniquement la case <b>repo</b>.</li>
           <li>Cliquer "Generate token" en bas, puis copier la clé (elle ne sera montrée qu'une fois) et la coller ci-dessus.</li>
         </ol>
@@ -140,48 +155,123 @@
     </div>
   </div>
 
-  <form id="artist-form">
+  <div class="tabs">
+    <button type="button" class="tab-btn active" data-tab="artistes">Artistes</button>
+    <button type="button" class="tab-btn" data-tab="hero">Page d'accueil</button>
+    <button type="button" class="tab-btn" data-tab="about">Qui sommes-nous</button>
+    <button type="button" class="tab-btn" data-tab="contact">Contact</button>
+  </div>
+
+  <!-- ================= ARTISTES ================= -->
+  <section class="tab-panel" data-tab="artistes">
+    <form id="artist-form">
+      <div class="card">
+        <h2>Ajouter un artiste</h2>
+        <label for="f-name">Nom de l'artiste *</label>
+        <input type="text" id="f-name" required>
+
+        <label for="f-genre">Genre / tag court *</label>
+        <input type="text" id="f-genre" placeholder="ex. Pop Solaire" required>
+
+        <label for="f-bio">Biographie *</label>
+        <textarea id="f-bio" required></textarea>
+      </div>
+
+      <div class="card">
+        <h2>Réseaux sociaux (optionnel)</h2>
+        <div class="social-row"><span>Spotify</span><input type="url" id="s-spotify" placeholder="https://open.spotify.com/..."></div>
+        <div class="social-row"><span>Instagram</span><input type="url" id="s-instagram" placeholder="https://instagram.com/..."></div>
+        <div class="social-row"><span>Facebook</span><input type="url" id="s-facebook" placeholder="https://facebook.com/..."></div>
+        <div class="social-row"><span>YouTube</span><input type="url" id="s-youtube" placeholder="https://youtube.com/..."></div>
+        <div class="social-row"><span>TikTok</span><input type="url" id="s-tiktok" placeholder="https://tiktok.com/..."></div>
+        <div class="social-row"><span>SoundCloud</span><input type="url" id="s-soundcloud" placeholder="https://soundcloud.com/..."></div>
+      </div>
+
+      <div class="card">
+        <h2>Photo *</h2>
+        <div class="dropzone" id="dropzone">
+          <div id="dropzone-empty">📷 Glissez la photo ici, ou cliquez pour la choisir</div>
+          <img id="preview" class="hidden">
+          <input type="file" id="f-image" accept="image/*">
+        </div>
+      </div>
+
+      <button type="submit" id="submit-btn">Publier l'artiste</button>
+      <div id="status" class="status-msg"></div>
+    </form>
+
     <div class="card">
-      <h2>Informations</h2>
-      <label for="f-name">Nom de l'artiste *</label>
-      <input type="text" id="f-name" required>
-
-      <label for="f-genre">Genre / tag court *</label>
-      <input type="text" id="f-genre" placeholder="ex. Pop Solaire" required>
-
-      <label for="f-bio">Biographie *</label>
-      <textarea id="f-bio" required></textarea>
+      <h2>Gérer les artistes existants</h2>
+      <div id="manage-empty" class="manage-empty">Chargement de la liste...</div>
+      <div class="artist-list hidden" id="artist-list"></div>
+      <div id="manage-status" class="manage-status"></div>
     </div>
+  </section>
 
+  <!-- ================= HERO ================= -->
+  <section class="tab-panel hidden" data-tab="hero">
     <div class="card">
-      <h2>Réseaux sociaux (optionnel)</h2>
-      <div class="social-row"><span>Spotify</span><input type="url" id="s-spotify" placeholder="https://open.spotify.com/..."></div>
-      <div class="social-row"><span>Instagram</span><input type="url" id="s-instagram" placeholder="https://instagram.com/..."></div>
-      <div class="social-row"><span>Facebook</span><input type="url" id="s-facebook" placeholder="https://facebook.com/..."></div>
-      <div class="social-row"><span>YouTube</span><input type="url" id="s-youtube" placeholder="https://youtube.com/..."></div>
-      <div class="social-row"><span>TikTok</span><input type="url" id="s-tiktok" placeholder="https://tiktok.com/..."></div>
-      <div class="social-row"><span>SoundCloud</span><input type="url" id="s-soundcloud" placeholder="https://soundcloud.com/..."></div>
+      <h2>Diapositives de la page d'accueil</h2>
+      <p style="font-size:13px;color:var(--muted);margin:0 0 4px;">Le grand visuel qui défile tout en haut du site.</p>
     </div>
+    <div id="hero-empty" class="manage-empty">Chargement...</div>
+    <div id="hero-list"></div>
+    <button type="button" class="secondary" id="hero-add" style="margin-bottom:14px;">+ Ajouter une diapositive</button>
+    <button type="button" id="hero-save">Publier les diapositives</button>
+    <div id="hero-status" class="status-msg"></div>
+  </section>
 
+  <!-- ================= ABOUT ================= -->
+  <section class="tab-panel hidden" data-tab="about">
     <div class="card">
-      <h2>Photo *</h2>
-      <div class="dropzone" id="dropzone">
-        <div id="dropzone-empty">📷 Glissez la photo ici, ou cliquez pour la choisir</div>
-        <img id="preview" class="hidden">
-        <input type="file" id="f-image" accept="image/*">
+      <h2>Qui sommes-nous</h2>
+      <label for="about-title">Titre</label>
+      <input type="text" id="about-title">
+      <label for="about-eyebrow">Accroche</label>
+      <input type="text" id="about-eyebrow">
+      <label>Paragraphes</label>
+      <div id="about-paragraphs"></div>
+      <button type="button" class="secondary" id="about-add-p" style="margin-top:8px;">+ Ajouter un paragraphe</button>
+    </div>
+    <div class="card">
+      <h2>Image</h2>
+      <div class="dropzone" id="about-dropzone">
+        <div id="about-dropzone-empty">📷 Glissez l'image ici, ou cliquez pour la choisir</div>
+        <img id="about-preview" class="hidden">
+        <input type="file" id="about-image" accept="image/*">
       </div>
     </div>
+    <button type="button" id="about-save">Publier</button>
+    <div id="about-status" class="status-msg"></div>
+  </section>
 
-    <button type="submit" id="submit-btn">Publier l'artiste</button>
-    <div id="status"></div>
-  </form>
-
-  <div class="card">
-    <h2>Gérer les artistes existants</h2>
-    <div id="manage-empty">Chargement de la liste...</div>
-    <div class="artist-list hidden" id="artist-list"></div>
-    <div id="manage-status"></div>
-  </div>
+  <!-- ================= CONTACT ================= -->
+  <section class="tab-panel hidden" data-tab="contact">
+    <div class="card">
+      <h2>Coordonnées</h2>
+      <label for="contact-city">Ville</label>
+      <input type="text" id="contact-city">
+      <label for="contact-email">Email</label>
+      <input type="email" id="contact-email">
+      <label for="contact-quote">Citation</label>
+      <textarea id="contact-quote"></textarea>
+    </div>
+    <div class="card">
+      <h2>Logo</h2>
+      <div class="dropzone" id="contact-dropzone">
+        <div id="contact-dropzone-empty">📷 Glissez le logo ici, ou cliquez pour le choisir</div>
+        <img id="contact-preview" class="hidden">
+        <input type="file" id="contact-image" accept="image/*">
+      </div>
+    </div>
+    <div class="card">
+      <h2>Réseaux sociaux</h2>
+      <div id="contact-socials"></div>
+      <button type="button" class="secondary" id="contact-add-social" style="margin-top:8px;">+ Ajouter un réseau</button>
+    </div>
+    <button type="button" id="contact-save">Publier</button>
+    <div id="contact-status" class="status-msg"></div>
+  </section>
 </div>
 
 <script>
@@ -190,10 +280,25 @@ const REPO = "baguettepublishing-wp-clone";
 const BRANCH = "master";
 const API = `https://api.github.com/repos/${OWNER}/${REPO}`;
 const SITE_URL = `https://${OWNER.toLowerCase()}.github.io/${REPO}/`;
+const SOCIAL_ICONS = ["linkedin", "instagram", "facebook", "youtube", "spotify", "tiktok"];
 
 const $ = (id) => document.getElementById(id);
 
-// ---- Token handling ----
+// ==================================================================
+// Onglets
+// ==================================================================
+document.querySelectorAll(".tab-btn").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".tab-btn").forEach((b) => b.classList.remove("active"));
+    document.querySelectorAll(".tab-panel").forEach((p) => p.classList.add("hidden"));
+    btn.classList.add("active");
+    document.querySelector(`.tab-panel[data-tab="${btn.dataset.tab}"]`).classList.remove("hidden");
+  });
+});
+
+// ==================================================================
+// Clé d'accès
+// ==================================================================
 function getToken() { return localStorage.getItem("bp_gh_token") || ""; }
 function setToken(t) { localStorage.setItem("bp_gh_token", t); }
 function clearToken() { localStorage.removeItem("bp_gh_token"); }
@@ -211,57 +316,23 @@ $("token-save").addEventListener("click", () => {
   setToken(v);
   $("token-input").value = "";
   refreshTokenUI();
-  loadArtistList();
+  loadEverything();
 });
 $("token-clear").addEventListener("click", () => {
   clearToken();
   refreshTokenUI();
-  loadArtistList();
+  loadEverything();
 });
 
-// ---- Image drag & drop ----
-let imageFile = null;
-const dropzone = $("dropzone");
-const fileInput = $("f-image");
-
-dropzone.addEventListener("click", () => fileInput.click());
-["dragenter", "dragover"].forEach(ev =>
-  dropzone.addEventListener(ev, (e) => { e.preventDefault(); dropzone.classList.add("drag"); })
-);
-["dragleave", "drop"].forEach(ev =>
-  dropzone.addEventListener(ev, (e) => { e.preventDefault(); dropzone.classList.remove("drag"); })
-);
-dropzone.addEventListener("drop", (e) => {
-  if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
-});
-fileInput.addEventListener("change", (e) => {
-  if (e.target.files.length) handleFile(e.target.files[0]);
-});
-
-function handleFile(file) {
-  if (!file.type.startsWith("image/")) return;
-  imageFile = file;
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    $("preview").src = e.target.result;
-    $("preview").classList.remove("hidden");
-    $("dropzone-empty").classList.add("hidden");
-  };
-  reader.readAsDataURL(file);
-}
-
-// ---- Helpers ----
+// ==================================================================
+// Aides génériques
+// ==================================================================
 function slugify(s) {
   return s.normalize("NFD").replace(/[̀-ͯ]/g, "")
     .toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 }
-
-function utf8ToBase64(str) {
-  return btoa(unescape(encodeURIComponent(str)));
-}
-function base64ToUtf8(str) {
-  return decodeURIComponent(escape(atob(str)));
-}
+function utf8ToBase64(str) { return btoa(unescape(encodeURIComponent(str))); }
+function base64ToUtf8(str) { return decodeURIComponent(escape(atob(str))); }
 function arrayBufferToBase64(buffer) {
   let binary = "";
   const bytes = new Uint8Array(buffer);
@@ -286,87 +357,129 @@ async function ghRequest(path, opts) {
   return res.json();
 }
 
-function setStatus(msg, cls) {
-  const el = $("status");
-  el.textContent = msg;
-  el.className = cls || "";
+async function getJsonFile(path) {
+  const current = await ghRequest(path, { method: "GET" });
+  return { data: JSON.parse(base64ToUtf8(current.content.replace(/\n/g, ""))), sha: current.sha };
 }
 
-// ---- Submit ----
+async function putJsonFile(path, data, message, sha) {
+  const newContent = JSON.stringify(data, null, 2) + "\n";
+  return ghRequest(path, {
+    method: "PUT",
+    body: JSON.stringify({ message, content: utf8ToBase64(newContent), sha, branch: BRANCH }),
+  });
+}
+
+async function uploadImage(file, slugBase) {
+  const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+  const suffix = Math.random().toString(36).slice(2, 7);
+  const path = `wp-content/uploads/2025/09/${slugify(slugBase)}-${suffix}.${ext}`;
+  const buffer = await file.arrayBuffer();
+  await ghRequest(path, {
+    method: "PUT",
+    body: JSON.stringify({ message: `Ajoute l'image ${slugBase}`, content: arrayBufferToBase64(buffer), branch: BRANCH }),
+  });
+  return path;
+}
+
+function setStatus(elId, msg, cls) {
+  const el = $(elId);
+  el.textContent = msg;
+  el.className = "status-msg" + (cls ? " " + cls : "");
+}
+
+// Zone glisser-déposer réutilisable. Renvoie un objet avec getFile()
+// (le nouveau fichier choisi, ou null si l'image n'a pas changé) et
+// getCurrentPath() (le chemin déjà publié, inchangé si pas de nouveau fichier).
+function makeDropzone(zoneId, emptyId, previewId, inputId, currentPath) {
+  const zone = $(zoneId), empty = $(emptyId), preview = $(previewId), input = $(inputId);
+  let file = null;
+  if (currentPath) {
+    preview.src = "../" + currentPath;
+    preview.classList.remove("hidden");
+    empty.classList.add("hidden");
+  }
+  zone.addEventListener("click", () => input.click());
+  ["dragenter", "dragover"].forEach((ev) => zone.addEventListener(ev, (e) => { e.preventDefault(); zone.classList.add("drag"); }));
+  ["dragleave", "drop"].forEach((ev) => zone.addEventListener(ev, (e) => { e.preventDefault(); zone.classList.remove("drag"); }));
+  function handle(f) {
+    if (!f || !f.type.startsWith("image/")) return;
+    file = f;
+    const reader = new FileReader();
+    reader.onload = (e) => { preview.src = e.target.result; preview.classList.remove("hidden"); empty.classList.add("hidden"); };
+    reader.readAsDataURL(f);
+  }
+  zone.addEventListener("drop", (e) => { if (e.dataTransfer.files.length) handle(e.dataTransfer.files[0]); });
+  input.addEventListener("change", (e) => { if (e.target.files.length) handle(e.target.files[0]); });
+  return { getFile: () => file, getCurrentPath: () => currentPath };
+}
+
+function loadEverything() {
+  loadArtistList();
+  loadHeroTab();
+  loadAboutTab();
+  loadContactTab();
+}
+
+// ==================================================================
+// ARTISTES — ajout
+// ==================================================================
+let imageFile = null;
+const dropzone = $("dropzone");
+const fileInput = $("f-image");
+dropzone.addEventListener("click", () => fileInput.click());
+["dragenter", "dragover"].forEach((ev) => dropzone.addEventListener(ev, (e) => { e.preventDefault(); dropzone.classList.add("drag"); }));
+["dragleave", "drop"].forEach((ev) => dropzone.addEventListener(ev, (e) => { e.preventDefault(); dropzone.classList.remove("drag"); }));
+dropzone.addEventListener("drop", (e) => { if (e.dataTransfer.files.length) handleArtistFile(e.dataTransfer.files[0]); });
+fileInput.addEventListener("change", (e) => { if (e.target.files.length) handleArtistFile(e.target.files[0]); });
+function handleArtistFile(file) {
+  if (!file.type.startsWith("image/")) return;
+  imageFile = file;
+  const reader = new FileReader();
+  reader.onload = (e) => { $("preview").src = e.target.result; $("preview").classList.remove("hidden"); $("dropzone-empty").classList.add("hidden"); };
+  reader.readAsDataURL(file);
+}
+
 $("artist-form").addEventListener("submit", async (e) => {
   e.preventDefault();
-  const token = getToken();
-  if (!token) { setStatus("Ajoutez d'abord votre clé d'accès ci-dessus.", "err"); return; }
-
+  if (!getToken()) { setStatus("status", "Ajoutez d'abord votre clé d'accès ci-dessus.", "err"); return; }
   const name = $("f-name").value.trim();
   const genre = $("f-genre").value.trim();
   const bio = $("f-bio").value.trim();
-  if (!name || !genre || !bio) { setStatus("Merci de remplir le nom, le genre et la biographie.", "err"); return; }
-  if (!imageFile) { setStatus("Merci d'ajouter une photo.", "err"); return; }
+  if (!name || !genre || !bio) { setStatus("status", "Merci de remplir le nom, le genre et la biographie.", "err"); return; }
+  if (!imageFile) { setStatus("status", "Merci d'ajouter une photo.", "err"); return; }
 
   const socials = [];
-  [["spotify","s-spotify"],["instagram","s-instagram"],["facebook","s-facebook"],
-   ["youtube","s-youtube"],["tiktok","s-tiktok"],["soundcloud","s-soundcloud"]]
-    .forEach(([icon, id]) => {
-      const url = $(id).value.trim();
-      if (url) socials.push({ icon, url });
-    });
+  [["spotify", "s-spotify"], ["instagram", "s-instagram"], ["facebook", "s-facebook"],
+   ["youtube", "s-youtube"], ["tiktok", "s-tiktok"], ["soundcloud", "s-soundcloud"]]
+    .forEach(([icon, id]) => { const url = $(id).value.trim(); if (url) socials.push({ icon, url }); });
 
   const btn = $("submit-btn");
   btn.disabled = true;
-
   try {
-    // 1. Upload de la photo
-    setStatus("Envoi de la photo...");
-    const ext = (imageFile.name.split(".").pop() || "jpg").toLowerCase();
-    const suffix = Math.random().toString(36).slice(2, 7);
-    const imagePath = `wp-content/uploads/2025/09/${slugify(name)}-${suffix}.${ext}`;
-    const imageBuffer = await imageFile.arrayBuffer();
-    await ghRequest(imagePath, {
-      method: "PUT",
-      body: JSON.stringify({
-        message: `Ajoute la photo de ${name}`,
-        content: arrayBufferToBase64(imageBuffer),
-        branch: BRANCH,
-      }),
-    });
-
-    // 2. Mise à jour de data/artists_grid.json
-    setStatus("Ajout de la fiche artiste...");
-    const current = await ghRequest("data/artists_grid.json", { method: "GET" });
-    const list = JSON.parse(base64ToUtf8(current.content.replace(/\n/g, "")));
+    setStatus("status", "Envoi de la photo...");
+    const imagePath = await uploadImage(imageFile, name);
+    setStatus("status", "Ajout de la fiche artiste...");
+    const { data: list, sha } = await getJsonFile("data/artists_grid.json");
     list.push({ name, genre, bio, card_image: imagePath, socials });
-    const newContent = JSON.stringify(list, null, 2) + "\n";
+    await putJsonFile("data/artists_grid.json", list, `Ajoute l'artiste ${name}`, sha);
 
-    await ghRequest("data/artists_grid.json", {
-      method: "PUT",
-      body: JSON.stringify({
-        message: `Ajoute l'artiste ${name}`,
-        content: utf8ToBase64(newContent),
-        sha: current.sha,
-        branch: BRANCH,
-      }),
-    });
-
-    setStatus(
-      `✅ « ${name} » a été ajouté ! Le site se met à jour automatiquement, ça prend environ 1 minute.\n\nVoir le site : ${SITE_URL}`,
-      "ok"
-    );
+    setStatus("status", `✅ « ${name} » a été ajouté ! Le site se met à jour automatiquement, ça prend environ 1 minute.\n\nVoir le site : ${SITE_URL}`, "ok");
     $("artist-form").reset();
     imageFile = null;
     $("preview").classList.add("hidden");
     $("dropzone-empty").classList.remove("hidden");
     loadArtistList();
   } catch (err) {
-    setStatus("❌ Une erreur est survenue : " + err.message, "err");
+    setStatus("status", "❌ Une erreur est survenue : " + err.message, "err");
   } finally {
     btn.disabled = false;
   }
 });
 
-// ---- Gestion / suppression des artistes existants ----
-function setManageStatus(msg) { $("manage-status").textContent = msg || ""; }
-
+// ==================================================================
+// ARTISTES — gestion / suppression
+// ==================================================================
 async function loadArtistList() {
   const empty = $("manage-empty");
   const listEl = $("artist-list");
@@ -380,15 +493,14 @@ async function loadArtistList() {
   empty.classList.remove("hidden");
   listEl.classList.add("hidden");
   try {
-    const current = await ghRequest("data/artists_grid.json", { method: "GET" });
-    const list = JSON.parse(base64ToUtf8(current.content.replace(/\n/g, "")));
-    renderArtistList(list, current.sha);
+    const { data: list } = await getJsonFile("data/artists_grid.json");
+    renderArtistList(list);
   } catch (err) {
     empty.textContent = "❌ Impossible de charger la liste : " + err.message;
   }
 }
 
-function renderArtistList(list, sha) {
+function renderArtistList(list) {
   const empty = $("manage-empty");
   const listEl = $("artist-list");
   if (!list.length) {
@@ -410,8 +522,6 @@ function renderArtistList(list, sha) {
     `;
     listEl.appendChild(row);
   });
-
-  // Confirmation en deux clics : 1er clic → "Confirmer ?", 2e clic dans les 4s → suppression.
   listEl.querySelectorAll("button[data-idx]").forEach((btn) => {
     let confirmTimer = null;
     btn.addEventListener("click", async () => {
@@ -420,49 +530,27 @@ function renderArtistList(list, sha) {
       if (!btn.classList.contains("confirming")) {
         btn.classList.add("confirming");
         btn.textContent = "Confirmer la suppression ?";
-        confirmTimer = setTimeout(() => {
-          btn.classList.remove("confirming");
-          btn.textContent = "Supprimer";
-        }, 4000);
+        confirmTimer = setTimeout(() => { btn.classList.remove("confirming"); btn.textContent = "Supprimer"; }, 4000);
         return;
       }
       clearTimeout(confirmTimer);
       btn.disabled = true;
       btn.textContent = "Suppression...";
-      setManageStatus("");
+      $("manage-status").textContent = "";
       try {
-        const current = await ghRequest("data/artists_grid.json", { method: "GET" });
-        const freshList = JSON.parse(base64ToUtf8(current.content.replace(/\n/g, "")));
-        const freshIdx = freshList.findIndex(a => a.name === artist.name && a.card_image === artist.card_image);
+        const { data: freshList, sha } = await getJsonFile("data/artists_grid.json");
+        const freshIdx = freshList.findIndex((a) => a.name === artist.name && a.card_image === artist.card_image);
         if (freshIdx === -1) throw new Error("Cet artiste a déjà été retiré (par quelqu'un d'autre entre-temps ?).");
         freshList.splice(freshIdx, 1);
-        const newContent = JSON.stringify(freshList, null, 2) + "\n";
-        await ghRequest("data/artists_grid.json", {
-          method: "PUT",
-          body: JSON.stringify({
-            message: `Retire l'artiste ${artist.name}`,
-            content: utf8ToBase64(newContent),
-            sha: current.sha,
-            branch: BRANCH,
-          }),
-        });
-        // Best-effort : supprime aussi la photo associée.
+        await putJsonFile("data/artists_grid.json", freshList, `Retire l'artiste ${artist.name}`, sha);
         try {
           const imgInfo = await ghRequest(artist.card_image, { method: "GET" });
-          await ghRequest(artist.card_image, {
-            method: "DELETE",
-            body: JSON.stringify({
-              message: `Retire la photo de ${artist.name}`,
-              sha: imgInfo.sha,
-              branch: BRANCH,
-            }),
-          });
+          await ghRequest(artist.card_image, { method: "DELETE", body: JSON.stringify({ message: `Retire la photo de ${artist.name}`, sha: imgInfo.sha, branch: BRANCH }) });
         } catch (imgErr) { /* pas grave si la photo ne peut pas être supprimée */ }
-
-        setManageStatus(`✅ « ${artist.name} » a été retiré. Le site se met à jour automatiquement (~1 minute).`);
+        $("manage-status").textContent = `✅ « ${artist.name} » a été retiré. Le site se met à jour automatiquement (~1 minute).`;
         loadArtistList();
       } catch (err) {
-        setManageStatus("❌ Erreur : " + err.message);
+        $("manage-status").textContent = "❌ Erreur : " + err.message;
         btn.disabled = false;
         btn.classList.remove("confirming");
         btn.textContent = "Supprimer";
@@ -471,7 +559,216 @@ function renderArtistList(list, sha) {
   });
 }
 
-loadArtistList();
+// ==================================================================
+// HERO — diapositives de la page d'accueil
+// ==================================================================
+let heroDropzones = [];
+
+async function loadHeroTab() {
+  const empty = $("hero-empty");
+  if (!getToken()) { empty.textContent = "Ajoutez votre clé d'accès ci-dessus."; empty.classList.remove("hidden"); $("hero-list").innerHTML = ""; return; }
+  empty.textContent = "Chargement...";
+  empty.classList.remove("hidden");
+  try {
+    const { data } = await getJsonFile("data/site_content.json");
+    renderHeroTab(data.hero_slides || []);
+    empty.classList.add("hidden");
+  } catch (err) {
+    empty.textContent = "❌ Impossible de charger : " + err.message;
+  }
+}
+
+function renderHeroTab(slides) {
+  const list = $("hero-list");
+  list.innerHTML = "";
+  heroDropzones = [];
+  slides.forEach((slide, i) => addHeroCard(slide, i));
+}
+
+function addHeroCard(slide, i) {
+  const list = $("hero-list");
+  const card = document.createElement("div");
+  card.className = "item-card";
+  const dzId = `hero-dz-${i}`, dzEmptyId = `hero-dz-empty-${i}`, dzPrevId = `hero-dz-prev-${i}`, dzInputId = `hero-dz-input-${i}`;
+  card.innerHTML = `
+    <div class="item-card-head"><span class="idx">Diapositive ${i + 1}</span><button type="button" class="remove-btn" data-remove>Retirer</button></div>
+    <label>Nom de l'artiste</label>
+    <input type="text" class="hero-name" value="${slide.name || ""}">
+    <label>Mot-clé (grand titre)</label>
+    <input type="text" class="hero-word" value="${slide.word || ""}">
+    <label>Phrase d'accroche</label>
+    <input type="text" class="hero-text" value="${slide.text || ""}">
+    <label>Photo</label>
+    <div class="dropzone small" id="${dzId}">
+      <div id="${dzEmptyId}">📷 Glissez la photo ici</div>
+      <img id="${dzPrevId}" class="hidden">
+      <input type="file" id="${dzInputId}" accept="image/*">
+    </div>
+  `;
+  list.appendChild(card);
+  const dz = makeDropzone(dzId, dzEmptyId, dzPrevId, dzInputId, slide.image);
+  heroDropzones.push(dz);
+  card.querySelector("[data-remove]").addEventListener("click", () => {
+    const idx = Array.from(list.children).indexOf(card);
+    heroDropzones.splice(idx, 1);
+    card.remove();
+  });
+}
+
+$("hero-add").addEventListener("click", () => addHeroCard({ name: "", word: "", text: "", image: "" }, $("hero-list").children.length));
+
+$("hero-save").addEventListener("click", async () => {
+  if (!getToken()) { setStatus("hero-status", "Ajoutez d'abord votre clé d'accès.", "err"); return; }
+  const btn = $("hero-save");
+  btn.disabled = true;
+  try {
+    setStatus("hero-status", "Envoi des photos modifiées...");
+    const cards = Array.from($("hero-list").children);
+    const slides = [];
+    for (let i = 0; i < cards.length; i++) {
+      const card = cards[i];
+      const name = card.querySelector(".hero-name").value.trim();
+      const word = card.querySelector(".hero-word").value.trim();
+      const text = card.querySelector(".hero-text").value.trim();
+      const dz = heroDropzones[i];
+      let image = dz.getCurrentPath() || "";
+      const file = dz.getFile();
+      if (file) image = await uploadImage(file, name || "hero");
+      slides.push({ name, word, text, image });
+    }
+    setStatus("hero-status", "Publication...");
+    const { data, sha } = await getJsonFile("data/site_content.json");
+    data.hero_slides = slides;
+    await putJsonFile("data/site_content.json", data, "Met à jour les diapositives de la page d'accueil", sha);
+    setStatus("hero-status", `✅ Diapositives publiées ! Ça prend environ 1 minute.\n\nVoir le site : ${SITE_URL}`, "ok");
+    loadHeroTab();
+  } catch (err) {
+    setStatus("hero-status", "❌ Une erreur est survenue : " + err.message, "err");
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+// ==================================================================
+// ABOUT — Qui sommes-nous
+// ==================================================================
+let aboutDropzone = null;
+
+async function loadAboutTab() {
+  if (!getToken()) return;
+  try {
+    const { data } = await getJsonFile("data/site_content.json");
+    const about = data.about || { title: "", eyebrow: "", paragraphs: [], image: "" };
+    $("about-title").value = about.title || "";
+    $("about-eyebrow").value = about.eyebrow || "";
+    const container = $("about-paragraphs");
+    container.innerHTML = "";
+    (about.paragraphs || []).forEach((p) => addAboutParagraph(p));
+    aboutDropzone = makeDropzone("about-dropzone", "about-dropzone-empty", "about-preview", "about-image", about.image);
+  } catch (err) {
+    setStatus("about-status", "❌ Impossible de charger : " + err.message, "err");
+  }
+}
+
+function addAboutParagraph(text) {
+  const container = $("about-paragraphs");
+  const row = document.createElement("div");
+  row.style.display = "flex";
+  row.style.gap = "8px";
+  row.style.marginBottom = "8px";
+  row.innerHTML = `<textarea style="flex:1;min-height:70px;">${text || ""}</textarea><button type="button" class="remove-btn" data-remove>✕</button>`;
+  row.querySelector("[data-remove]").addEventListener("click", () => row.remove());
+  container.appendChild(row);
+}
+$("about-add-p").addEventListener("click", () => addAboutParagraph(""));
+
+$("about-save").addEventListener("click", async () => {
+  if (!getToken()) { setStatus("about-status", "Ajoutez d'abord votre clé d'accès.", "err"); return; }
+  const btn = $("about-save");
+  btn.disabled = true;
+  try {
+    setStatus("about-status", "Publication...");
+    const paragraphs = Array.from($("about-paragraphs").querySelectorAll("textarea")).map((t) => t.value.trim()).filter(Boolean);
+    let image = aboutDropzone.getCurrentPath() || "";
+    const file = aboutDropzone.getFile();
+    if (file) image = await uploadImage(file, "about");
+    const { data, sha } = await getJsonFile("data/site_content.json");
+    data.about = { title: $("about-title").value.trim(), eyebrow: $("about-eyebrow").value.trim(), paragraphs, image };
+    await putJsonFile("data/site_content.json", data, "Met à jour la section Qui sommes-nous", sha);
+    setStatus("about-status", `✅ Publié ! Ça prend environ 1 minute.\n\nVoir le site : ${SITE_URL}`, "ok");
+    loadAboutTab();
+  } catch (err) {
+    setStatus("about-status", "❌ Une erreur est survenue : " + err.message, "err");
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+// ==================================================================
+// CONTACT
+// ==================================================================
+let contactDropzone = null;
+
+async function loadContactTab() {
+  if (!getToken()) return;
+  try {
+    const { data } = await getJsonFile("data/site_content.json");
+    const contact = data.contact || { city: "", email: "", quote: "", logo: "", socials: [] };
+    $("contact-city").value = contact.city || "";
+    $("contact-email").value = contact.email || "";
+    $("contact-quote").value = contact.quote || "";
+    contactDropzone = makeDropzone("contact-dropzone", "contact-dropzone-empty", "contact-preview", "contact-image", contact.logo);
+    const container = $("contact-socials");
+    container.innerHTML = "";
+    (contact.socials || []).forEach((s) => addContactSocial(s.icon, s.url));
+  } catch (err) {
+    setStatus("contact-status", "❌ Impossible de charger : " + err.message, "err");
+  }
+}
+
+function addContactSocial(icon, url) {
+  const container = $("contact-socials");
+  const row = document.createElement("div");
+  row.className = "social-row";
+  const options = SOCIAL_ICONS.map((i) => `<option value="${i}" ${i === icon ? "selected" : ""}>${i}</option>`).join("");
+  row.innerHTML = `<select style="width:130px;flex-shrink:0;">${options}</select><input type="url" value="${url || ""}" placeholder="https://..."><button type="button" class="remove-btn" data-remove>✕</button>`;
+  row.querySelector("[data-remove]").addEventListener("click", () => row.remove());
+  container.appendChild(row);
+}
+$("contact-add-social").addEventListener("click", () => addContactSocial(SOCIAL_ICONS[0], ""));
+
+$("contact-save").addEventListener("click", async () => {
+  if (!getToken()) { setStatus("contact-status", "Ajoutez d'abord votre clé d'accès.", "err"); return; }
+  const btn = $("contact-save");
+  btn.disabled = true;
+  try {
+    setStatus("contact-status", "Publication...");
+    const socials = Array.from($("contact-socials").children).map((row) => ({
+      icon: row.querySelector("select").value,
+      url: row.querySelector("input").value.trim(),
+    })).filter((s) => s.url);
+    let logo = contactDropzone.getCurrentPath() || "";
+    const file = contactDropzone.getFile();
+    if (file) logo = await uploadImage(file, "logo-contact");
+    const { data, sha } = await getJsonFile("data/site_content.json");
+    data.contact = {
+      city: $("contact-city").value.trim(),
+      email: $("contact-email").value.trim(),
+      quote: $("contact-quote").value.trim(),
+      logo,
+      socials,
+    };
+    await putJsonFile("data/site_content.json", data, "Met à jour la section Contact", sha);
+    setStatus("contact-status", `✅ Publié ! Ça prend environ 1 minute.\n\nVoir le site : ${SITE_URL}`, "ok");
+    loadContactTab();
+  } catch (err) {
+    setStatus("contact-status", "❌ Une erreur est survenue : " + err.message, "err");
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+loadEverything();
 </script>
 </body>
 </html>
