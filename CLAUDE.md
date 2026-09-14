@@ -13,6 +13,34 @@ transition avant un hébergement définitif (OVH, à confirmer avec le
 client). Le design reproduit fidèlement l'original — toute modification
 doit préserver ce rendu.
 
+## ⚠️ GitHub est temporaire — ne pas construire dessus comme si c'était définitif
+
+**Ce dépôt GitHub ne sera plus l'hébergement du site au moment de la
+remise au client.** Le site final vivra sur l'**OVH du client**. Ça a des
+conséquences concrètes à garder en tête :
+
+- Le mécanisme de publication actuel de l'outil admin (`admin/index.html`)
+  repose entièrement sur l'**API GitHub Contents** (lecture/écriture de
+  fichiers via un jeton, déclenchement de la GitHub Action). **Rien de
+  ça ne fonctionnera sur OVH tel quel** — OVH n'a pas d'API GitHub. Ce
+  mécanisme devra être reconstruit pour l'hébergement cible (selon ce
+  qu'OVH permet : accès FTP/SFTP, base de données MySQL si retour à un
+  vrai WordPress, éventuel déploiement par script/webhook si OVH le
+  permet).
+- Un "connecteur GitHub" côté claude.ai (pour que le client pilote Claude
+  en autonomie) ne sera **plus le bon connecteur** une fois le site sur
+  OVH. Il faudra soit un accès FTP/SFTP équivalent, soit revenir à une
+  administration WordPress classique (REST API + Application Passwords)
+  si le client héberge à nouveau sous WordPress.
+- Ne pas coder en dur d'URL GitHub Pages (`romainpitot.github.io/...`)
+  comme si elle allait perdurer — c'est une URL de travail, pas celle du
+  site final.
+
+**En résumé : tout ce qui est construit ici doit être vu comme un
+prototype fonctionnel de la logique (contenu modulaire, historique,
+confirmation avant publication) — la logique se transporte, le
+mécanisme technique de publication devra être refait pour OVH.**
+
 **Site en ligne :** https://romainpitot.github.io/baguettepublishing-wp-clone/
 **Outil d'administration simple (formulaire) :** .../admin/
 
