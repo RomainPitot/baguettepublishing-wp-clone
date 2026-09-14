@@ -122,6 +122,19 @@
   .item-card { background: #0f0f14; border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin-bottom: 14px; }
   .item-card-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
   .item-card-head .idx { font-size: 12px; color: var(--muted); font-weight: 600; letter-spacing: .04em; text-transform: uppercase; }
+
+  .history-row {
+    background: #0f0f14; border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px; margin-bottom: 10px;
+    display: flex; align-items: center; gap: 14px; justify-content: space-between;
+  }
+  .history-row .info { flex: 1; min-width: 0; }
+  .history-row .msg { font-size: 14px; color: var(--text); }
+  .history-row .meta { font-size: 12px; color: var(--muted); margin-top: 3px; }
+  .history-row .current-badge { font-size: 11px; color: #34d399; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
+  .history-row button { width: auto; background: transparent; border: 1px solid var(--border); color: var(--text); padding: 8px 14px; font-size: 13px; font-weight: 500; flex-shrink: 0; }
+  .history-row button:hover { background: rgba(233,30,99,.08); border-color: var(--pink); }
+  .history-row button.confirming { background: var(--pink); color: #fff; border-color: var(--pink); }
 </style>
 </head>
 <body>
@@ -160,6 +173,7 @@
     <button type="button" class="tab-btn" data-tab="hero">Page d'accueil</button>
     <button type="button" class="tab-btn" data-tab="about">Qui sommes-nous</button>
     <button type="button" class="tab-btn" data-tab="contact">Contact</button>
+    <button type="button" class="tab-btn" data-tab="history">Historique</button>
   </div>
 
   <!-- ================= ARTISTES ================= -->
@@ -272,6 +286,17 @@
     <button type="button" id="contact-save">Publier</button>
     <div id="contact-status" class="status-msg"></div>
   </section>
+
+  <!-- ================= HISTORIQUE ================= -->
+  <section class="tab-panel hidden" data-tab="history">
+    <div class="card">
+      <h2>Historique des publications</h2>
+      <p style="font-size:13px;color:var(--muted);margin:0;">Chaque modification (artistes, page d'accueil, à propos, contact) est enregistrée ici. Vous pouvez revenir à une version précédente à tout moment.</p>
+      <p style="font-size:12px;color:var(--muted);margin:10px 0 0;">⚠️ La restauration remet en place le texte tel qu'il était à cette date. Si une photo a été supprimée depuis, elle ne sera pas ramenée automatiquement.</p>
+    </div>
+    <div id="history-empty" class="manage-empty">Chargement...</div>
+    <div id="history-list"></div>
+  </section>
 </div>
 
 <script>
@@ -340,9 +365,9 @@ function arrayBufferToBase64(buffer) {
   return btoa(binary);
 }
 
-async function ghRequest(path, opts) {
+async function ghApi(url, opts) {
   const token = getToken();
-  const res = await fetch(`${API}/contents/${path}`, {
+  const res = await fetch(url, {
     ...opts,
     headers: {
       "Authorization": `Bearer ${token}`,
@@ -355,6 +380,27 @@ async function ghRequest(path, opts) {
     throw new Error(`${res.status} ${res.statusText}${body.message ? " — " + body.message : ""}`);
   }
   return res.json();
+}
+async function ghRequest(path, opts) { return ghApi(`${API}/contents/${path}`, opts); }
+
+// Bouton "Publier" à confirmation en deux clics : le 1er clic affiche un
+// message de confirmation pendant quelques secondes, le 2e déclenche
+// réellement l'action. Évite d'écraser du contenu par un clic accidentel.
+function wireConfirmButton(btn, normalLabel, confirmLabel, onConfirmed) {
+  let timer = null;
+  btn.textContent = normalLabel;
+  btn.addEventListener("click", async () => {
+    if (!btn.classList.contains("confirming")) {
+      btn.classList.add("confirming");
+      btn.textContent = confirmLabel;
+      timer = setTimeout(() => { btn.classList.remove("confirming"); btn.textContent = normalLabel; }, 5000);
+      return;
+    }
+    clearTimeout(timer);
+    btn.classList.remove("confirming");
+    btn.textContent = normalLabel;
+    await onConfirmed();
+  });
 }
 
 async function getJsonFile(path) {
@@ -433,6 +479,7 @@ function loadEverything() {
   loadHeroTab();
   loadAboutTab();
   loadContactTab();
+  loadHistoryTab();
 }
 
 // ==================================================================
@@ -631,7 +678,7 @@ function addHeroCard(slide, i) {
 
 $("hero-add").addEventListener("click", () => addHeroCard({ name: "", word: "", text: "", image: "" }, $("hero-list").children.length));
 
-$("hero-save").addEventListener("click", async () => {
+wireConfirmButton($("hero-save"), "Publier les diapositives", "Confirmer la publication ?", async () => {
   if (!getToken()) { setStatus("hero-status", "Ajoutez d'abord votre clé d'accès.", "err"); return; }
   const btn = $("hero-save");
   btn.disabled = true;
@@ -700,7 +747,7 @@ function addAboutParagraph(text) {
 }
 $("about-add-p").addEventListener("click", () => addAboutParagraph(""));
 
-$("about-save").addEventListener("click", async () => {
+wireConfirmButton($("about-save"), "Publier", "Confirmer la publication ?", async () => {
   if (!getToken()) { setStatus("about-status", "Ajoutez d'abord votre clé d'accès.", "err"); return; }
   const btn = $("about-save");
   btn.disabled = true;
@@ -759,7 +806,7 @@ function addContactSocial(icon, url) {
 }
 $("contact-add-social").addEventListener("click", () => addContactSocial(SOCIAL_ICONS[0], ""));
 
-$("contact-save").addEventListener("click", async () => {
+wireConfirmButton($("contact-save"), "Publier", "Confirmer la publication ?", async () => {
   if (!getToken()) { setStatus("contact-status", "Ajoutez d'abord votre clé d'accès.", "err"); return; }
   const btn = $("contact-save");
   btn.disabled = true;
@@ -793,6 +840,96 @@ $("contact-save").addEventListener("click", async () => {
     btn.disabled = false;
   }
 });
+
+// ==================================================================
+// HISTORIQUE — journal des publications + restauration
+// ==================================================================
+const HISTORY_FILES = ["data/artists_grid.json", "data/site_content.json"];
+
+function timeAgo(dateStr) {
+  const diffMs = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.round(diffMs / 60000);
+  if (mins < 1) return "à l'instant";
+  if (mins < 60) return `il y a ${mins} min`;
+  const hours = Math.round(mins / 60);
+  if (hours < 24) return `il y a ${hours} h`;
+  const days = Math.round(hours / 24);
+  return `il y a ${days} j`;
+}
+
+async function loadHistoryTab() {
+  const empty = $("history-empty");
+  const listEl = $("history-list");
+  if (!getToken()) { empty.textContent = "Ajoutez votre clé d'accès ci-dessus."; empty.classList.remove("hidden"); listEl.innerHTML = ""; return; }
+  empty.textContent = "Chargement...";
+  empty.classList.remove("hidden");
+  listEl.innerHTML = "";
+  try {
+    const commits = await ghApi(`${API}/commits?per_page=25`, { method: "GET" });
+    empty.classList.add("hidden");
+    commits.forEach((c, idx) => renderHistoryRow(c, idx === 0));
+  } catch (err) {
+    empty.textContent = "❌ Impossible de charger l'historique : " + err.message;
+  }
+}
+
+function renderHistoryRow(commit, isCurrent) {
+  const listEl = $("history-list");
+  const row = document.createElement("div");
+  row.className = "history-row";
+  const message = (commit.commit.message || "").split("\n")[0];
+  const date = commit.commit.author?.date || commit.commit.committer?.date;
+  row.innerHTML = `
+    <div class="info">
+      <div class="msg">${message}</div>
+      <div class="meta">${date ? timeAgo(date) : ""}${isCurrent ? ' · <span class="current-badge">Version actuelle</span>' : ""}</div>
+    </div>
+    ${isCurrent ? "" : '<button type="button" data-sha="' + commit.sha + '">Restaurer cette version</button>'}
+  `;
+  listEl.appendChild(row);
+  const btn = row.querySelector("button[data-sha]");
+  if (btn) {
+    wireConfirmButton(btn, "Restaurer cette version", "Confirmer la restauration ?", () => restoreToCommit(commit.sha, message, btn));
+  }
+}
+
+async function restoreToCommit(sha, message, btn) {
+  btn.disabled = true;
+  const original = btn.textContent;
+  btn.textContent = "Restauration...";
+  try {
+    for (const path of HISTORY_FILES) {
+      let oldFile;
+      try {
+        oldFile = await ghRequest(`${path}?ref=${sha}`, { method: "GET" });
+      } catch (err) {
+        continue; // ce fichier n'existait peut-être pas encore à cette date
+      }
+      const current = await ghRequest(path, { method: "GET" });
+      if (oldFile.sha === current.sha) continue; // déjà identique, rien à faire
+      await ghRequest(path, {
+        method: "PUT",
+        body: JSON.stringify({
+          message: `Restaure ${path} à l'état du commit "${message}"`,
+          content: oldFile.content.replace(/\n/g, ""),
+          sha: current.sha,
+          branch: BRANCH,
+        }),
+      });
+    }
+    $("history-empty").classList.remove("hidden");
+    $("history-empty").textContent = "✅ Restauration effectuée. Le site se met à jour automatiquement (~1 minute).";
+    loadHistoryTab();
+    loadArtistList();
+    loadHeroTab();
+    loadAboutTab();
+    loadContactTab();
+  } catch (err) {
+    btn.disabled = false;
+    btn.textContent = original;
+    alert("Erreur lors de la restauration : " + err.message);
+  }
+}
 
 loadEverything();
 </script>
