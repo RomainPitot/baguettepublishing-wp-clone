@@ -9,9 +9,14 @@ personne qui l'ouvre y trouvera les mêmes règles.
 
 Copie statique (HTML/CSS/JS/images) du site WordPress
 baguettepublishing.com, hébergée sur GitHub Pages, pendant la phase de
-transition avant un hébergement définitif (OVH, à confirmer avec le
-client). Le design reproduit fidèlement l'original — toute modification
-doit préserver ce rendu.
+transition avant un hébergement définitif sur l'OVH du client. Le design
+reproduit fidèlement l'original — toute modification doit préserver ce
+rendu.
+
+**Décision actée avec le client (à ne pas remettre en cause sans lui
+reposer la question) : sortir complètement de WordPress.** Le site
+définitif sur OVH sera un site statique/sur-mesure "from scratch", pas
+un retour à WordPress. Ne pas proposer de réinstaller WordPress sur OVH.
 
 ## ⚠️ GitHub est temporaire — ne pas construire dessus comme si c'était définitif
 
@@ -23,15 +28,14 @@ conséquences concrètes à garder en tête :
   repose entièrement sur l'**API GitHub Contents** (lecture/écriture de
   fichiers via un jeton, déclenchement de la GitHub Action). **Rien de
   ça ne fonctionnera sur OVH tel quel** — OVH n'a pas d'API GitHub. Ce
-  mécanisme devra être reconstruit pour l'hébergement cible (selon ce
-  qu'OVH permet : accès FTP/SFTP, base de données MySQL si retour à un
-  vrai WordPress, éventuel déploiement par script/webhook si OVH le
-  permet).
+  mécanisme devra être reconstruit pour l'hébergement cible, en fonction
+  de ce qu'OVH permet concrètement (accès FTP/SFTP seul ? exécution de
+  PHP possible pour un petit backend ? — à vérifier avant de choisir
+  l'architecture).
 - Un "connecteur GitHub" côté claude.ai (pour que le client pilote Claude
   en autonomie) ne sera **plus le bon connecteur** une fois le site sur
-  OVH. Il faudra soit un accès FTP/SFTP équivalent, soit revenir à une
-  administration WordPress classique (REST API + Application Passwords)
-  si le client héberge à nouveau sous WordPress.
+  OVH — il faudra un accès équivalent adapté à cet hébergement (FTP/SFTP,
+  ou une API si un backend PHP est construit).
 - Ne pas coder en dur d'URL GitHub Pages (`romainpitot.github.io/...`)
   comme si elle allait perdurer — c'est une URL de travail, pas celle du
   site final.
